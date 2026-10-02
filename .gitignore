@@ -1,0 +1,8 @@
+# Run artifacts: chat exports, media and transcripts must never be committed
+wa_*
+transcripts.json
+*.ogg
+*.opus
+*.jpg
+*.png
+__pycache__/
