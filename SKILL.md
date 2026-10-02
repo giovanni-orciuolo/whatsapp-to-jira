@@ -5,7 +5,7 @@ description: Read the recent messages of a WhatsApp chat in WhatsApp Web, with v
 
 # WhatsApp to Jira
 
-This skill reads a WhatsApp chat in WhatsApp Web, transcribes the voice notes on the local machine, reads the screenshots, and proposes Jira tickets. Nothing goes to Jira before the user approves the preview.
+Nothing goes to Jira before the user approves the preview.
 
 ## Settings
 
@@ -21,16 +21,16 @@ Change these values to match your team.
 - `uv` is on the PATH. `scripts/transcribe.py` installs its own dependencies on the first run.
 - The Atlassian MCP server is connected.
 
-## How it works
+## Design
 
-`scripts/wa.js` reads the in-memory message store of WhatsApp Web (`window.require('WAWebCollections')`). It does not read the page DOM, for two reasons:
+`scripts/wa.js` reads the in-memory message store of WhatsApp Web (`window.require('WAWebCollections')`). The page DOM is unreliable:
 
 - WhatsApp virtualizes the message list. Rows outside the viewport stay in the DOM without content.
 - Chrome marks a tab as hidden when its window is not on screen. A hidden tab renders nothing, and Chrome slows its timers to about one tick per minute.
 
 The store works in a hidden tab, and it gives the decrypted media files directly.
 
-The browser tool has two limits that shape the workflow:
+Limits of the browser tool:
 
 - `javascript_tool` cuts return values at about 1,500 characters. It also blocks strings that look like base64, raw HTML, or URLs with query strings. For this reason the script saves bulk data as Chrome downloads and returns only short summaries.
 - Each call stops after 45 seconds.
@@ -87,16 +87,16 @@ Read the conversation in order. Put each transcript and image at the position of
 
 A message that the user forwards (`forwarded: true`) usually quotes the end client. Treat it as the requirement.
 
-### 6b. Choose the labels
+### 7. Choose the labels
 
 1. Find the labels that the project uses. Run JQL `project = <KEY> AND labels is not EMPTY ORDER BY created DESC` and count the labels. Never invent a label that the project does not use.
 2. If the user has the source code on this machine, find the code of each candidate. Search for the exact error text, the product code, or the endpoint. The code location tells you the area of the work, for example backend, frontend, or proxy.
 3. Propose the labels that match those areas. If a field or a feature does not exist yet, include each area that the change must touch.
 4. Show the labels and the evidence (file and line) in the preview.
 
-### 7. Write the tickets
+### 8. Write the tickets
 
-1. Invoke the `deslop` skill and the `simple-english` skill if they are installed. Apply their rules to each summary and description: short sentences, active voice, no em dashes, no bold lead-ins, no filler words. A requirement uses "must" or its equivalent in the ticket language.
+1. Invoke the `writing-whip`, `deslop` and `simple-english` skills if they are installed. Apply their rules to each summary and description: short sentences, active voice, no em dashes, no bold lead-ins, no filler words. A requirement uses "must" or its equivalent in the ticket language.
 2. Write the final tickets in the ticket language from the Settings section.
 3. Use this structure for the description. Translate the headings into the ticket language.
    - Context: who reported the problem and when, in one or two sentences.
@@ -105,7 +105,7 @@ A message that the user forwards (`forwarded: true`) usually quotes the end clie
    - References: record numbers, and the source as "WhatsApp, <chat>, <date> <time>".
 4. Do not copy personal data of end customers into tickets, such as names, addresses, phone numbers, or tax codes. The record numbers are enough to find them.
 
-### 8. Show the preview and get approval
+### 9. Show the preview and get approval
 
 Show each proposed ticket with its project, type, labels, summary, and full description. Also list the items that you dropped and the reason, and the duplicates that you found. Then ask the user:
 
@@ -115,7 +115,7 @@ Show each proposed ticket with its project, type, labels, summary, and full desc
 
 Do not call `createJiraIssue` before the user answers. Apply the edits of the user. If the edits are large, show the changed tickets again.
 
-### 9. Create the tickets
+### 10. Create the tickets
 
 1. Get the `cloudId` from `getAccessibleAtlassianResources`. If the user has more than one site, ask which site to use.
 2. Create the approved tickets with `createJiraIssue` and `contentFormat: "markdown"`. Set the labels in `additional_fields`, for example `{"labels": ["BACKEND"]}`.
@@ -140,4 +140,4 @@ When WhatsApp releases an update, `probe()` reports what stopped working. All in
 - If `loadSince` fails, then `loadEarlierMsgs` has a new signature. Use the same Proxy method on its argument.
 - If message fields come back empty, inspect a message model with `Object.keys(chat.msgs.getModelsArray().at(-1).attributes ?? {})`. Then update `toMessage`.
 
-After each fix, inject the script again. Then run `probe()`, run `extract()` on a known chat, and run `saveMedia()` on one image and one voice note.
+After each fix, inject the script again and run `probe()`. Test `extract()` on a known chat and `saveMedia()` on one image and one voice note.
