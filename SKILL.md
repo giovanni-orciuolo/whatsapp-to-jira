@@ -1,6 +1,6 @@
 ---
 name: whatsapp-to-jira
-description: Read the recent messages of a WhatsApp chat through WhatsApp Web (text, voice notes, screenshots), find the bugs to fix and the features to build, and propose Jira tickets for approval before creating them. Use when the user asks to turn a WhatsApp chat, a client conversation, or "the messages from <person>" into Jira tickets.
+description: Read the recent messages of a WhatsApp chat in WhatsApp Web, with voice notes and screenshots. Find the bugs to fix and the features to build, and propose Jira tickets for approval before you create them. Use when the user asks to turn a WhatsApp chat, a client conversation, or "the messages from <person>" into Jira tickets.
 ---
 
 # WhatsApp to Jira

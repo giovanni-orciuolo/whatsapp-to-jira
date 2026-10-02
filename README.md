@@ -16,8 +16,6 @@ Clients often report bugs and ask for features in WhatsApp chats, with voice not
 
 ## Before you use it
 
-Read these points first.
-
 - The skill uses internal modules of WhatsApp Web. These modules are not a public API. WhatsApp can change them at any time, and the skill then stops working until you update one block of configuration (see Maintenance). Automated access can also conflict with the WhatsApp Terms of Service. You decide if this risk is acceptable for your account.
 - The skill only reads. It does not send messages or change chats.
 - Chat content goes into your Claude session, so Claude can analyze it. Use the skill only on conversations that you are allowed to process in this way.
@@ -71,7 +69,7 @@ For better tickets, also install the `deslop` and `simple-english` skills. If th
 The skill has three parts:
 
 - `SKILL.md` contains the workflow that Claude follows.
-- `scripts/wa.js` is injected into the WhatsApp Web page. It reads the in-memory message store of the page and downloads files through Chrome.
+- `scripts/wa.js` runs inside the WhatsApp Web page. Claude injects it. It reads the in-memory message store of the page and downloads files through Chrome.
 - `scripts/transcribe.py` transcribes every audio file in a folder into `transcripts.json`.
 
 The script reads the message store, not the visible page, for two reasons. WhatsApp Web only puts the messages near the visible area into the page. Also, Chrome stops drawing a tab when its window is behind other windows. The store has every loaded message and works when the tab is in the background. The browser tool returns only about 1,500 characters per call, so the script saves the messages and the media as files in your Downloads folder. Claude then reads them from the disk.
